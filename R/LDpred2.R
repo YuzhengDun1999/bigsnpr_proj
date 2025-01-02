@@ -70,7 +70,7 @@ snp_ldpred2_inf <- function(corr, df_beta, h2) {
 #'
 #' @rdname LDpred2
 #'
-snp_ldpred2_grid <- function(corr, corr_chr, df_beta, grid_param,
+snp_ldpred2_grid <- function(corr, corr_chr, threshold, df_beta, grid_param,
                              burn_in = 50,
                              num_iter = 100,
                              ncores = 1,
@@ -99,7 +99,7 @@ snp_ldpred2_grid <- function(corr, corr_chr, df_beta, grid_param,
   for (i in 1:length(start_point)) {
     ld_blk = corr_chr[start_point[i]: end_point[i], start_point[i]: end_point[i]]
     ld_blk_eig = eigen(ld_blk, symmetric = TRUE)
-    idx = sum(ld_blk_eig$values > 10 ** -4)
+    idx = sum(ld_blk_eig$values > threshold)
     beta_hat[start_point[i]: end_point[i]] = ld_blk_eig$vectors[,1:idx] %*% t(ld_blk_eig$vectors[,1:idx]) %*% beta_hat[start_point[i]: end_point[i]]
   }
   if (!return_sampling_betas) {
