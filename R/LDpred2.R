@@ -89,18 +89,20 @@ snp_ldpred2_grid <- function(corr, corr_chr, threshold, df_beta, grid_param,
   scale <- sqrt(N * df_beta$beta_se^2 + df_beta$beta^2)
   beta_hat <- df_beta$beta / scale
 
-  possible_startpoint = unique(corr$first_i) + 1
-  check_point = data.frame(start = possible_startpoint,
-                           end = c(possible_startpoint[2:length(possible_startpoint)], nrow(corr_chr)))
-  check_point = check_point[check_point$end - check_point$start > 200,]
-  start_point = sort(unique(c(1, check_point[,1])))
-  end_point = c(start_point[2:length(start_point)], nrow(corr_chr))
+  if (threshold > 0){
+    possible_startpoint = unique(corr$first_i) + 1
+    check_point = data.frame(start = possible_startpoint,
+                             end = c(possible_startpoint[2:length(possible_startpoint)], nrow(corr_chr)))
+    check_point = check_point[check_point$end - check_point$start > 200,]
+    start_point = sort(unique(c(1, check_point[,1])))
+    end_point = c(start_point[2:length(start_point)], nrow(corr_chr))
 
-  for (i in 1:length(start_point)) {
-    ld_blk = corr_chr[start_point[i]: end_point[i], start_point[i]: end_point[i]]
-    ld_blk_eig = eigen(ld_blk, symmetric = TRUE)
-    idx = sum(ld_blk_eig$values > threshold)
-    beta_hat[start_point[i]: end_point[i]] = ld_blk_eig$vectors[,1:idx] %*% t(ld_blk_eig$vectors[,1:idx]) %*% beta_hat[start_point[i]: end_point[i]]
+    for (i in 1:length(start_point)) {
+      ld_blk = corr_chr[start_point[i]: end_point[i], start_point[i]: end_point[i]]
+      ld_blk_eig = eigen(ld_blk, symmetric = TRUE)
+      idx = sum(ld_blk_eig$values > threshold)
+      beta_hat[start_point[i]: end_point[i]] = ld_blk_eig$vectors[,1:idx] %*% t(ld_blk_eig$vectors[,1:idx]) %*% beta_hat[start_point[i]: end_point[i]]
+    }
   }
   if (!return_sampling_betas) {
 
